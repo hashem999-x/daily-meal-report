@@ -77,14 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Daily Restaurant Report" },
+      {
+        name: "description",
+        content:
+          "Code-only login for branches, area manager and admin — daily EVM3 and cheese entry with auto-generated ranked bilingual report.",
+      },
+      { name: "author", content: "Hashem Al-Zabidi" },
+      { property: "og:title", content: "Daily Restaurant Report" },
+      {
+        property: "og:description",
+        content:
+          "Branch daily reports, ranked bilingual output, area-manager dashboard and admin controls.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
