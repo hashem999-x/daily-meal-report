@@ -14,7 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accounts: {
+        Row: {
+          branch_id: string | null
+          code: string
+          created_at: string
+          display_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          branch_id?: string | null
+          code: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          branch_id?: string | null
+          code?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      branches: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          id: string
+          name_ar: string
+          name_en: string
+          sort_order: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          name_ar: string
+          name_en: string
+          sort_order?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          name_ar?: string
+          name_en?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      daily_entries: {
+        Row: {
+          branch_id: string
+          cheese_units: number
+          entry_date: string
+          evm3_units: number
+          id: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          branch_id: string
+          cheese_units?: number
+          entry_date: string
+          evm3_units?: number
+          id?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          branch_id?: string
+          cheese_units?: number
+          entry_date?: string
+          evm3_units?: number
+          id?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_entries_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_settings: {
+        Row: {
+          ar_format: Json
+          en_format: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          ar_format?: Json
+          en_format?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          ar_format?: Json
+          en_format?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          account_id: string
+          created_at: string
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          expires_at?: string
+          token: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          expires_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +182,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "area_manager" | "branch"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +309,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "area_manager", "branch"],
+    },
   },
 } as const
