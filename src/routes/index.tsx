@@ -651,13 +651,19 @@ function FormatEditor({
       {extras}
       <div className="mt-4 space-y-2">
         <p className="text-sm font-medium">Positions</p>
-        <div className="grid grid-cols-[80px_1fr_120px] gap-2 text-[11px] text-muted-foreground uppercase tracking-wide">
+        <p className="text-xs text-muted-foreground">
+          Per-line spacing: number of spaces inserted after each segment. Use these to align the parentheses across rows.
+        </p>
+        <div className="grid grid-cols-[70px_60px_1fr_60px_60px_60px] gap-2 text-[10px] text-muted-foreground uppercase tracking-wide">
           <span>Emoji</span>
+          <span>After emoji</span>
           <span>Label</span>
-          <span>Spaces after name</span>
+          <span>After label</span>
+          <span>After arrow</span>
+          <span>After name</span>
         </div>
         {positions.map((p: any, i) => (
-          <div key={i} className="grid grid-cols-[80px_1fr_120px] gap-2 items-center">
+          <div key={i} className="grid grid-cols-[70px_60px_1fr_60px_60px_60px] gap-2 items-center">
             <input
               value={p.emoji}
               onChange={(e) => {
@@ -668,6 +674,17 @@ function FormatEditor({
               className="border rounded-md px-2 py-1 text-center bg-background"
             />
             <input
+              type="number"
+              min={0}
+              value={(p as any).spaces_after_emoji ?? 1}
+              onChange={(e) => {
+                const next = [...positions];
+                next[i] = { ...p, spaces_after_emoji: Math.max(0, Number(e.target.value) || 0) };
+                onPositions(next);
+              }}
+              className="border rounded-md px-2 py-1 bg-background text-center"
+            />
+            <input
               value={p.name}
               onChange={(e) => {
                 const next = [...positions];
@@ -675,6 +692,28 @@ function FormatEditor({
                 onPositions(next);
               }}
               className="border rounded-md px-2 py-1 bg-background"
+            />
+            <input
+              type="number"
+              min={0}
+              value={(p as any).spaces_after_rank ?? spacesBefore}
+              onChange={(e) => {
+                const next = [...positions];
+                next[i] = { ...p, spaces_after_rank: Math.max(0, Number(e.target.value) || 0) };
+                onPositions(next);
+              }}
+              className="border rounded-md px-2 py-1 bg-background text-center"
+            />
+            <input
+              type="number"
+              min={0}
+              value={(p as any).spaces_after_arrow ?? spacesAfter}
+              onChange={(e) => {
+                const next = [...positions];
+                next[i] = { ...p, spaces_after_arrow: Math.max(0, Number(e.target.value) || 0) };
+                onPositions(next);
+              }}
+              className="border rounded-md px-2 py-1 bg-background text-center"
             />
             <input
               type="number"
