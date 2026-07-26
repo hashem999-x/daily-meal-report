@@ -104,9 +104,6 @@ function Login({ onLogin }: { onLogin: (s: Session) => void }) {
         className="w-full max-w-sm border rounded-xl p-8 shadow-sm bg-card"
       >
         <h1 className="text-2xl font-semibold text-center">Access Code</h1>
-        <p className="text-center text-sm text-muted-foreground mt-1">
-          رمز الدخول
-        </p>
         <input
           autoFocus
           inputMode="numeric"
