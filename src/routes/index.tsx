@@ -637,7 +637,7 @@ function FormatEditor({
   onArrow: (v: string) => void;
   onSpacesBefore: (v: number) => void;
   onSpacesAfter: (v: number) => void;
-  onPositions: (v: { name: string; emoji: string }[]) => void;
+  onPositions: (v: { name: string; emoji: string; spaces_after_name?: number }[]) => void;
   extras?: React.ReactNode;
 }) {
   return (
@@ -651,8 +651,13 @@ function FormatEditor({
       {extras}
       <div className="mt-4 space-y-2">
         <p className="text-sm font-medium">Positions</p>
-        {positions.map((p, i) => (
-          <div key={i} className="flex gap-2 items-center">
+        <div className="grid grid-cols-[80px_1fr_120px] gap-2 text-[11px] text-muted-foreground uppercase tracking-wide">
+          <span>Emoji</span>
+          <span>Label</span>
+          <span>Spaces after name</span>
+        </div>
+        {positions.map((p: any, i) => (
+          <div key={i} className="grid grid-cols-[80px_1fr_120px] gap-2 items-center">
             <input
               value={p.emoji}
               onChange={(e) => {
@@ -660,7 +665,7 @@ function FormatEditor({
                 next[i] = { ...p, emoji: e.target.value };
                 onPositions(next);
               }}
-              className="border rounded-md px-2 py-1 w-20 text-center bg-background"
+              className="border rounded-md px-2 py-1 text-center bg-background"
             />
             <input
               value={p.name}
@@ -669,7 +674,18 @@ function FormatEditor({
                 next[i] = { ...p, name: e.target.value };
                 onPositions(next);
               }}
-              className="border rounded-md px-2 py-1 flex-1 bg-background"
+              className="border rounded-md px-2 py-1 bg-background"
+            />
+            <input
+              type="number"
+              min={0}
+              value={(p as any).spaces_after_name ?? 0}
+              onChange={(e) => {
+                const next = [...positions];
+                next[i] = { ...p, spaces_after_name: Math.max(0, Number(e.target.value) || 0) };
+                onPositions(next);
+              }}
+              className="border rounded-md px-2 py-1 bg-background text-center"
             />
           </div>
         ))}
