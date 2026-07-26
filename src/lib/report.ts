@@ -73,8 +73,8 @@ function line(
   const afterRank = spaces(pos.spaces_after_rank ?? cfg.spaces_before_arrow);
   const afterArrow = spaces(pos.spaces_after_arrow ?? cfg.spaces_after_arrow);
   const afterName = spaces(afterNameSpaces);
-  const valueText = isTop ? `(*${value}*)` : `(${value})`;
-  return `${pos.emoji}${afterEmoji}${pos.name}${afterRank}${cfg.arrow}${afterArrow}${name}${afterName} ${valueText}`;
+  const valueText = `(*${value}*)`;
+return `${pos.emoji}${afterEmoji}${pos.name}${afterRank}${cfg.arrow}${afterArrow}${name}${afterName} ${valueText}`;
 }
 
 function section(
