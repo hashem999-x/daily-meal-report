@@ -640,6 +640,10 @@ function FormatEditor({
   onSpacesAfter,
   onPositions,
   extras,
+  branches,
+  branchNameSpaces,
+  onBranchNameSpaces,
+  branchNameKey,
 }: {
   title: string;
   arrow: string;
@@ -651,6 +655,10 @@ function FormatEditor({
   onSpacesAfter: (v: number) => void;
   onPositions: (v: { name: string; emoji: string; spaces_after_name?: number }[]) => void;
   extras?: React.ReactNode;
+  branches: { id: string; name_ar: string; name_en: string }[];
+  branchNameSpaces: Record<string, number>;
+  onBranchNameSpaces: (m: Record<string, number>) => void;
+  branchNameKey: "ar" | "en";
 }) {
   return (
     <div className="border rounded-xl p-5 bg-card">
