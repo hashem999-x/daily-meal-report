@@ -11,6 +11,7 @@ export type Entry = {
 };
 
 export type PositionCfg = { name: string; emoji: string };
+export type PositionCfgV2 = { name: string; emoji: string; spaces_after_name?: number };
 
 export type ArFormat = {
   title_ar: string;
@@ -18,7 +19,7 @@ export type ArFormat = {
   cheese_label: string;
   best_evm3_label: string;
   best_cheese_label: string;
-  positions: PositionCfg[];
+  positions: PositionCfgV2[];
   arrow: string;
   spaces_before_arrow: number;
   spaces_after_arrow: number;
@@ -35,7 +36,7 @@ export type EnFormat = {
   closing: string;
   meal_header: string;
   cheese_header: string;
-  positions: PositionCfg[];
+  positions: PositionCfgV2[];
   arrow: string;
   spaces_before_arrow: number;
   spaces_after_arrow: number;
@@ -52,20 +53,21 @@ function rank<T>(items: T[], key: (i: T) => number): T[] {
 }
 
 function line(
-  pos: PositionCfg,
+  pos: PositionCfgV2,
   name: string,
   value: number,
   cfg: { arrow: string; spaces_before_arrow: number; spaces_after_arrow: number },
   isTop: boolean,
 ): string {
   const shown = isTop ? `**${name}**` : name;
-  return `${pos.emoji} ${pos.name}${spaces(cfg.spaces_before_arrow)}${cfg.arrow}${spaces(cfg.spaces_after_arrow)}${shown} (${value})`;
+  const afterName = spaces(pos.spaces_after_name ?? 0);
+  return `${pos.emoji} ${pos.name}${spaces(cfg.spaces_before_arrow)}${cfg.arrow}${spaces(cfg.spaces_after_arrow)}${shown}${afterName} (${value})`;
 }
 
 function section(
   header: string,
   ranked: { name: string; value: number }[],
-  positions: PositionCfg[],
+  positions: PositionCfgV2[],
   cfg: { arrow: string; spaces_before_arrow: number; spaces_after_arrow: number },
 ): string {
   const lines: string[] = [header];
@@ -133,8 +135,6 @@ export function buildReport(
     section(ar.meal_emojis, evm3Ar, ar.positions, cfgAr),
     ``,
     section(ar.cheese_emojis, cheeseAr, ar.positions, cfgAr),
-    ``,
-    `MADE BY HASHEM AL-ZABIDI`,
   ].join("\n");
 
   const enText = [
@@ -148,8 +148,6 @@ export function buildReport(
     section(en.meal_header, evm3En, en.positions, cfgEn),
     ``,
     section(en.cheese_header, cheeseEn, en.positions, cfgEn),
-    ``,
-    `MADE BY HASHEM AL-ZABIDI`,
   ].join("\n");
 
   return { ar: arText, en: enText };
@@ -168,22 +166,31 @@ export function parseFreeText(
   type Bucket = { evm3?: number; cheese?: number };
   const acc = new Map<string, Bucket>();
   let current: BranchLite | null = null;
-  const numRe = /(\d+[\d,]*)/;
 
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) continue;
 
-    // Try to detect a branch on this line
-    const b = matchBranch(line.replace(/\d+/g, " "), branches);
+    // Try to detect a branch on this line — strip digits and known label
+    // words first so "Evm3", "EVM3 unit", "cheese unit" don't leak in.
+    const forNameMatch = line
+      .replace(/evm\s*3?/gi, " ")
+      .replace(/extra\s*cheese|cheese|جبن/gi, " ")
+      .replace(/large\s*meal|meal|وجبه\s*كبير|كبير|units?/gi, " ")
+      .replace(/\d+/g, " ");
+    const b = matchBranch(forNameMatch, branches);
     if (b && !/evm|cheese|جبن|وجبه|كبير|extra|unit/i.test(line)) {
       current = b;
-      // still fall through in case numbers are on same line
     }
 
     const isCheese = /cheese|جبن/i.test(line);
     const isEvm3 = /evm|وجبه\s*كبير|large|meal/i.test(line);
-    const m = line.match(numRe);
+    // Prefer a number that follows "=" or ":" (the actual value).
+    // Fall back to any number AFTER stripping the "evm3" / "3" label token.
+    const cleaned = line.replace(/evm\s*3?/gi, " ");
+    const m =
+      line.match(/[=:]\s*(\d+[\d,]*)/) ??
+      cleaned.match(/(\d+[\d,]*)/);
     if (!current || !m) continue;
     const value = parseInt(m[1].replace(/,/g, ""), 10);
     if (!Number.isFinite(value)) continue;
