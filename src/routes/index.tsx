@@ -163,7 +163,7 @@ function AppShell({ session, onLogout }: { session: Session; onLogout: () => voi
           <div className="font-semibold">Daily Restaurant Report</div>
           <div className="text-sm text-muted-foreground">
             {session.displayName}
-            {info?.branchName ? ` · ${info.branchName}` : ""}
+            {info?.branchName ? ` · ${info.branchName.split(" / ")[0]}` : ""}
           </div>
           <div className="ml-auto flex gap-2 flex-wrap">
             {isBranch && (
