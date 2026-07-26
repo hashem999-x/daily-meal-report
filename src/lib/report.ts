@@ -11,7 +11,14 @@ export type Entry = {
 };
 
 export type PositionCfg = { name: string; emoji: string };
-export type PositionCfgV2 = { name: string; emoji: string; spaces_after_name?: number };
+export type PositionCfgV2 = {
+  name: string;
+  emoji: string;
+  spaces_after_name?: number;
+  spaces_after_emoji?: number;
+  spaces_after_rank?: number;
+  spaces_after_arrow?: number;
+};
 
 export type ArFormat = {
   title_ar: string;
@@ -59,9 +66,12 @@ function line(
   cfg: { arrow: string; spaces_before_arrow: number; spaces_after_arrow: number },
   isTop: boolean,
 ): string {
-  const shown = isTop ? `**${name}**` : name;
+  const afterEmoji = spaces(pos.spaces_after_emoji ?? 1);
+  const afterRank = spaces(pos.spaces_after_rank ?? cfg.spaces_before_arrow);
+  const afterArrow = spaces(pos.spaces_after_arrow ?? cfg.spaces_after_arrow);
   const afterName = spaces(pos.spaces_after_name ?? 0);
-  return `${pos.emoji} ${pos.name}${spaces(cfg.spaces_before_arrow)}${cfg.arrow}${spaces(cfg.spaces_after_arrow)}${shown}${afterName} (${value})`;
+  const valueText = isTop ? `(*${value}*)` : `(${value})`;
+  return `${pos.emoji}${afterEmoji}${pos.name}${afterRank}${cfg.arrow}${afterArrow}${name}${afterName} ${valueText}`;
 }
 
 function section(
