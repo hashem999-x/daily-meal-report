@@ -568,6 +568,12 @@ function SettingsView({ token }: { token: string }) {
         spacesBefore={ar.spaces_before_arrow}
         spacesAfter={ar.spaces_after_arrow}
         positions={ar.positions}
+        branches={state.branches ?? []}
+        branchNameSpaces={ar.branch_name_spaces ?? {}}
+        onBranchNameSpaces={(m) =>
+          setState({ ...state, ar_format: { ...ar, branch_name_spaces: m } })
+        }
+        branchNameKey="ar"
         onArrow={(v) => setState({ ...state, ar_format: { ...ar, arrow: v } })}
         onSpacesBefore={(v) => setState({ ...state, ar_format: { ...ar, spaces_before_arrow: v } })}
         onSpacesAfter={(v) => setState({ ...state, ar_format: { ...ar, spaces_after_arrow: v } })}
@@ -594,6 +600,12 @@ function SettingsView({ token }: { token: string }) {
         spacesBefore={en.spaces_before_arrow}
         spacesAfter={en.spaces_after_arrow}
         positions={en.positions}
+        branches={state.branches ?? []}
+        branchNameSpaces={en.branch_name_spaces ?? {}}
+        onBranchNameSpaces={(m) =>
+          setState({ ...state, en_format: { ...en, branch_name_spaces: m } })
+        }
+        branchNameKey="en"
         onArrow={(v) => setState({ ...state, en_format: { ...en, arrow: v } })}
         onSpacesBefore={(v) => setState({ ...state, en_format: { ...en, spaces_before_arrow: v } })}
         onSpacesAfter={(v) => setState({ ...state, en_format: { ...en, spaces_after_arrow: v } })}
