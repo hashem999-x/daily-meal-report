@@ -451,6 +451,7 @@ function ReportPane({
 function Dashboard({ token }: { token: string }) {
   const call = useServerFn(getDashboard);
   const [state, setState] = useState<Awaited<ReturnType<typeof call>> | null>(null);
+  const [expanded, setExpanded] = useState(false);
   useEffect(() => {
     call({ data: { token } }).then(setState);
   }, []);
@@ -458,38 +459,53 @@ function Dashboard({ token }: { token: string }) {
   if (!state) return <p className="text-sm text-muted-foreground">Loading…</p>;
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Totals dashboard</h2>
-      <p className="text-sm text-muted-foreground">
-        Today: <span className="font-mono">{state.today}</span>. Month-to-date resets each new month; historic months remain in history.
-      </p>
-      <div className="overflow-auto border rounded-xl bg-card">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/40">
-            <tr>
-              <th className="text-left p-2">Branch</th>
-              <th className="text-right p-2">MTD EVM3</th>
-              <th className="text-right p-2">MTD Cheese</th>
-              <th className="text-right p-2">YTD EVM3</th>
-              <th className="text-right p-2">YTD Cheese</th>
-              <th className="text-right p-2">Last yr EVM3</th>
-              <th className="text-right p-2">Last yr Cheese</th>
-            </tr>
-          </thead>
-          <tbody>
-            {state.branches.map((b) => (
-              <tr key={b.id} className="border-t">
-                <td className="p-2">{b.name_en} / {b.name_ar}</td>
-                <td className="p-2 text-right">{b.totals.mtd.evm3}</td>
-                <td className="p-2 text-right">{b.totals.mtd.cheese}</td>
-                <td className="p-2 text-right">{b.totals.ytd.evm3}</td>
-                <td className="p-2 text-right">{b.totals.ytd.cheese}</td>
-                <td className="p-2 text-right">{b.totals.lastYear.evm3}</td>
-                <td className="p-2 text-right">{b.totals.lastYear.cheese}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="text-xl font-semibold">Dashboard</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Today <span className="font-mono">{state.today}</span> — month-to-date at a glance.
+          </p>
+        </div>
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="border rounded-md px-3 py-1.5 text-sm hover:bg-accent"
+        >
+          {expanded ? "Hide details" : "Show all periods"}
+        </button>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {state.branches.map((b) => (
+          <div key={b.id} className="border rounded-xl bg-card p-4">
+            <div className="font-semibold">{b.name_en}</div>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <Stat label="MTD EVM3" value={b.totals.mtd.evm3} />
+              <Stat label="MTD Cheese" value={b.totals.mtd.cheese} />
+            </div>
+            {expanded ? (
+              <div className="mt-3 border-t pt-3 grid grid-cols-2 gap-3">
+                <Stat label="YTD EVM3" value={b.totals.ytd.evm3} muted />
+                <Stat label="YTD Cheese" value={b.totals.ytd.cheese} muted />
+                <Stat label="Last yr EVM3" value={b.totals.lastYear.evm3} muted />
+                <Stat label="Last yr Cheese" value={b.totals.lastYear.cheese} muted />
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value, muted }: { label: string; value: number; muted?: boolean }) {
+  return (
+    <div>
+      <div className={`text-[11px] uppercase tracking-wide ${muted ? "text-muted-foreground/70" : "text-muted-foreground"}`}>
+        {label}
+      </div>
+      <div className={`font-mono ${muted ? "text-base" : "text-lg font-semibold"}`}>
+        {value.toLocaleString()}
       </div>
     </div>
   );
