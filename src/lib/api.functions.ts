@@ -306,7 +306,20 @@ export const getSettings = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const acc = await requireSession(data.token);
     requireRole(acc, ["admin", "area_manager"]);
-    return await loadSettings();
+    const settings = await loadSettings();
+    const supa = await getAdmin();
+    const { data: branches } = await supa
+      .from("branches")
+      .select("id, name_ar, name_en, sort_order")
+      .order("sort_order");
+    return {
+      ...settings,
+      branches: (branches ?? []).map((b) => ({
+        id: b.id as string,
+        name_ar: b.name_ar as string,
+        name_en: b.name_en as string,
+      })),
+    };
   });
 
 export const saveSettings = createServerFn({ method: "POST" })

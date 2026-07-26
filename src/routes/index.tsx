@@ -568,6 +568,12 @@ function SettingsView({ token }: { token: string }) {
         spacesBefore={ar.spaces_before_arrow}
         spacesAfter={ar.spaces_after_arrow}
         positions={ar.positions}
+        branches={state.branches ?? []}
+        branchNameSpaces={ar.branch_name_spaces ?? {}}
+        onBranchNameSpaces={(m) =>
+          setState({ ...state, ar_format: { ...ar, branch_name_spaces: m } })
+        }
+        branchNameKey="ar"
         onArrow={(v) => setState({ ...state, ar_format: { ...ar, arrow: v } })}
         onSpacesBefore={(v) => setState({ ...state, ar_format: { ...ar, spaces_before_arrow: v } })}
         onSpacesAfter={(v) => setState({ ...state, ar_format: { ...ar, spaces_after_arrow: v } })}
@@ -594,6 +600,12 @@ function SettingsView({ token }: { token: string }) {
         spacesBefore={en.spaces_before_arrow}
         spacesAfter={en.spaces_after_arrow}
         positions={en.positions}
+        branches={state.branches ?? []}
+        branchNameSpaces={en.branch_name_spaces ?? {}}
+        onBranchNameSpaces={(m) =>
+          setState({ ...state, en_format: { ...en, branch_name_spaces: m } })
+        }
+        branchNameKey="en"
         onArrow={(v) => setState({ ...state, en_format: { ...en, arrow: v } })}
         onSpacesBefore={(v) => setState({ ...state, en_format: { ...en, spaces_before_arrow: v } })}
         onSpacesAfter={(v) => setState({ ...state, en_format: { ...en, spaces_after_arrow: v } })}
@@ -628,6 +640,10 @@ function FormatEditor({
   onSpacesAfter,
   onPositions,
   extras,
+  branches,
+  branchNameSpaces,
+  onBranchNameSpaces,
+  branchNameKey,
 }: {
   title: string;
   arrow: string;
@@ -639,6 +655,10 @@ function FormatEditor({
   onSpacesAfter: (v: number) => void;
   onPositions: (v: { name: string; emoji: string; spaces_after_name?: number }[]) => void;
   extras?: React.ReactNode;
+  branches: { id: string; name_ar: string; name_en: string }[];
+  branchNameSpaces: Record<string, number>;
+  onBranchNameSpaces: (m: Record<string, number>) => void;
+  branchNameKey: "ar" | "en";
 }) {
   return (
     <div className="border rounded-xl p-5 bg-card">
@@ -652,18 +672,17 @@ function FormatEditor({
       <div className="mt-4 space-y-2">
         <p className="text-sm font-medium">Positions</p>
         <p className="text-xs text-muted-foreground">
-          Per-line spacing: number of spaces inserted after each segment. Use these to align the parentheses across rows.
+          Per-line spacing (after emoji, after rank word, after arrow) — plain number, no arrows.
         </p>
-        <div className="grid grid-cols-[70px_60px_1fr_60px_60px_60px] gap-2 text-[10px] text-muted-foreground uppercase tracking-wide">
+        <div className="grid grid-cols-[70px_60px_1fr_60px_60px] gap-2 text-[10px] text-muted-foreground uppercase tracking-wide">
           <span>Emoji</span>
           <span>After emoji</span>
           <span>Label</span>
           <span>After label</span>
           <span>After arrow</span>
-          <span>After name</span>
         </div>
         {positions.map((p: any, i) => (
-          <div key={i} className="grid grid-cols-[70px_60px_1fr_60px_60px_60px] gap-2 items-center">
+          <div key={i} className="grid grid-cols-[70px_60px_1fr_60px_60px] gap-2 items-center">
             <input
               value={p.emoji}
               onChange={(e) => {
@@ -673,16 +692,13 @@ function FormatEditor({
               }}
               className="border rounded-md px-2 py-1 text-center bg-background"
             />
-            <input
-              type="number"
-              min={0}
+            <PlainNumber
               value={(p as any).spaces_after_emoji ?? 1}
-              onChange={(e) => {
+              onChange={(n) => {
                 const next = [...positions];
-                next[i] = { ...p, spaces_after_emoji: Math.max(0, Number(e.target.value) || 0) };
+                next[i] = { ...p, spaces_after_emoji: n };
                 onPositions(next);
               }}
-              className="border rounded-md px-2 py-1 bg-background text-center"
             />
             <input
               value={p.name}
@@ -693,43 +709,67 @@ function FormatEditor({
               }}
               className="border rounded-md px-2 py-1 bg-background"
             />
-            <input
-              type="number"
-              min={0}
+            <PlainNumber
               value={(p as any).spaces_after_rank ?? spacesBefore}
-              onChange={(e) => {
+              onChange={(n) => {
                 const next = [...positions];
-                next[i] = { ...p, spaces_after_rank: Math.max(0, Number(e.target.value) || 0) };
+                next[i] = { ...p, spaces_after_rank: n };
                 onPositions(next);
               }}
-              className="border rounded-md px-2 py-1 bg-background text-center"
             />
-            <input
-              type="number"
-              min={0}
+            <PlainNumber
               value={(p as any).spaces_after_arrow ?? spacesAfter}
-              onChange={(e) => {
+              onChange={(n) => {
                 const next = [...positions];
-                next[i] = { ...p, spaces_after_arrow: Math.max(0, Number(e.target.value) || 0) };
+                next[i] = { ...p, spaces_after_arrow: n };
                 onPositions(next);
               }}
-              className="border rounded-md px-2 py-1 bg-background text-center"
-            />
-            <input
-              type="number"
-              min={0}
-              value={(p as any).spaces_after_name ?? 0}
-              onChange={(e) => {
-                const next = [...positions];
-                next[i] = { ...p, spaces_after_name: Math.max(0, Number(e.target.value) || 0) };
-                onPositions(next);
-              }}
-              className="border rounded-md px-2 py-1 bg-background text-center"
             />
           </div>
         ))}
       </div>
+      <div className="mt-6 space-y-2">
+        <p className="text-sm font-medium">Spaces after each branch name</p>
+        <p className="text-xs text-muted-foreground">
+          Fixed number of spaces inserted after this branch's name, applied wherever the branch appears in the ranking.
+        </p>
+        <div className="grid gap-2">
+          {branches.map((b) => (
+            <div key={b.id} className="grid grid-cols-[1fr_80px] gap-2 items-center">
+              <span className="text-sm">
+                {branchNameKey === "ar" ? b.name_ar : b.name_en}
+              </span>
+              <PlainNumber
+                value={branchNameSpaces[b.id] ?? 0}
+                onChange={(n) => onBranchNameSpaces({ ...branchNameSpaces, [b.id]: n })}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
+  );
+}
+
+function PlainNumber({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={String(value ?? 0)}
+      onChange={(e) => {
+        const digits = e.target.value.replace(/[^0-9]/g, "");
+        onChange(digits === "" ? 0 : parseInt(digits, 10));
+      }}
+      className="border rounded-md px-2 py-1 bg-background text-center"
+    />
   );
 }
 
@@ -767,10 +807,14 @@ function NumberRow({
     <label className="block text-sm">
       <span className="font-medium">{label}</span>
       <input
-        type="number"
-        min={0}
-        value={value ?? 0}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={String(value ?? 0)}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/[^0-9]/g, "");
+          onChange(digits === "" ? 0 : parseInt(digits, 10));
+        }}
         className="mt-1 w-full border rounded-md px-2 py-1 bg-background"
       />
     </label>

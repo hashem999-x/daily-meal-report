@@ -33,6 +33,7 @@ export type ArFormat = {
   header_emojis: string;
   cheese_emojis: string;
   meal_emojis: string;
+  branch_name_spaces?: Record<string, number>;
 };
 
 export type EnFormat = {
@@ -47,6 +48,7 @@ export type EnFormat = {
   arrow: string;
   spaces_before_arrow: number;
   spaces_after_arrow: number;
+  branch_name_spaces?: Record<string, number>;
 };
 
 export type ReportSettings = { ar_format: ArFormat; en_format: EnFormat };
@@ -65,27 +67,30 @@ function line(
   value: number,
   cfg: { arrow: string; spaces_before_arrow: number; spaces_after_arrow: number },
   isTop: boolean,
+  afterNameSpaces: number,
 ): string {
   const afterEmoji = spaces(pos.spaces_after_emoji ?? 1);
   const afterRank = spaces(pos.spaces_after_rank ?? cfg.spaces_before_arrow);
   const afterArrow = spaces(pos.spaces_after_arrow ?? cfg.spaces_after_arrow);
-  const afterName = spaces(pos.spaces_after_name ?? 0);
+  const afterName = spaces(afterNameSpaces);
   const valueText = isTop ? `(*${value}*)` : `(${value})`;
   return `${pos.emoji}${afterEmoji}${pos.name}${afterRank}${cfg.arrow}${afterArrow}${name}${afterName} ${valueText}`;
 }
 
 function section(
   header: string,
-  ranked: { name: string; value: number }[],
+  ranked: { name: string; value: number; branch_id: string }[],
   positions: PositionCfgV2[],
   cfg: { arrow: string; spaces_before_arrow: number; spaces_after_arrow: number },
+  branchSpaces: Record<string, number> | undefined,
 ): string {
   const lines: string[] = [header];
   ranked.forEach((r, i) => {
     const p = positions[Math.min(i, positions.length - 1)];
     // insert a separator between top-3 and the rest
     if (i === 3) lines.push("_______________");
-    lines.push(line(p, r.name, r.value, cfg, i === 0));
+    const extra = branchSpaces?.[r.branch_id] ?? p.spaces_after_name ?? 0;
+    lines.push(line(p, r.name, r.value, cfg, i === 0, extra));
   });
   return lines.join("\n");
 }
@@ -117,18 +122,22 @@ export function buildReport(
   const evm3Ar = rank(entries, (e) => e.evm3_units).map((e) => ({
     name: e.name_ar,
     value: e.evm3_units,
+    branch_id: e.branch_id,
   }));
   const cheeseAr = rank(entries, (e) => e.cheese_units).map((e) => ({
     name: e.name_ar,
     value: e.cheese_units,
+    branch_id: e.branch_id,
   }));
   const evm3En = rank(entries, (e) => e.evm3_units).map((e) => ({
     name: e.name_en,
     value: e.evm3_units,
+    branch_id: e.branch_id,
   }));
   const cheeseEn = rank(entries, (e) => e.cheese_units).map((e) => ({
     name: e.name_en,
     value: e.cheese_units,
+    branch_id: e.branch_id,
   }));
 
   const bestEvm3Ar = evm3Ar[0]?.name ?? "";
@@ -142,9 +151,9 @@ export function buildReport(
     `⭐ ${ar.best_evm3_label} 🍔 (${bestEvm3Ar}) ✨`,
     `⭐ ${ar.best_cheese_label} 🧀 (${bestCheeseAr}) ✨`,
     ``,
-    section(ar.meal_emojis, evm3Ar, ar.positions, cfgAr),
+    section(ar.meal_emojis, evm3Ar, ar.positions, cfgAr, ar.branch_name_spaces),
     ``,
-    section(ar.cheese_emojis, cheeseAr, ar.positions, cfgAr),
+    section(ar.cheese_emojis, cheeseAr, ar.positions, cfgAr, ar.branch_name_spaces),
   ].join("\n");
 
   const enText = [
@@ -155,9 +164,9 @@ export function buildReport(
     `🧀 ${en.best_cheese_label} ${en.arrow} (${bestCheeseEn}) ✨`,
     en.closing,
     ``,
-    section(en.meal_header, evm3En, en.positions, cfgEn),
+    section(en.meal_header, evm3En, en.positions, cfgEn, en.branch_name_spaces),
     ``,
-    section(en.cheese_header, cheeseEn, en.positions, cfgEn),
+    section(en.cheese_header, cheeseEn, en.positions, cfgEn, en.branch_name_spaces),
   ].join("\n");
 
   return { ar: arText, en: enText };
