@@ -26,6 +26,8 @@ export type ArFormat = {
   cheese_label: string;
   best_evm3_label: string;
   best_cheese_label: string;
+  best_evm3_spaces?: number;
+  best_cheese_spaces?: number;
   positions: PositionCfgV2[];
   arrow: string;
   spaces_before_arrow: number;
@@ -148,8 +150,8 @@ export function buildReport(
   const arText = [
     `${ar.title_ar} (${formatDate(entryDate)})`,
     ``,
-    `⭐ ${ar.best_evm3_label} 🍔 (${bestEvm3Ar}) ✨`,
-    `⭐ ${ar.best_cheese_label} 🧀 (${bestCheeseAr}) ✨`,
+    `⭐ ${ar.best_evm3_label}${spaces(ar.best_evm3_spaces ?? 1)}${ar.arrow} (${bestEvm3Ar}) ✨`,
+    `⭐ ${ar.best_cheese_label}${spaces(ar.best_cheese_spaces ?? 1)}${ar.arrow} (${bestCheeseAr}) ✨`,
     ``,
     section(ar.meal_emojis, evm3Ar, ar.positions, cfgAr, ar.branch_name_spaces),
     ``,
