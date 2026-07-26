@@ -807,10 +807,14 @@ function NumberRow({
     <label className="block text-sm">
       <span className="font-medium">{label}</span>
       <input
-        type="number"
-        min={0}
-        value={value ?? 0}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={String(value ?? 0)}
+        onChange={(e) => {
+          const digits = e.target.value.replace(/[^0-9]/g, "");
+          onChange(digits === "" ? 0 : parseInt(digits, 10));
+        }}
         className="mt-1 w-full border rounded-md px-2 py-1 bg-background"
       />
     </label>
