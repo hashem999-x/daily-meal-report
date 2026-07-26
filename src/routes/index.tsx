@@ -377,9 +377,7 @@ function ReportView({ token }: { token: string }) {
           <tbody>
             {state.merged.map((m) => (
               <tr key={m.branch_id} className="border-t">
-                <td className="py-1.5">
-                  {m.name_en} / {m.name_ar}
-                </td>
+                <td className="py-1.5">{m.name_en}</td>
                 <td>{m.evm3_units}</td>
                 <td>{m.cheese_units}</td>
                 <td>
