@@ -160,7 +160,7 @@ export function buildReport(
     en.greeting,
     ``,
     `• ${en.intro} (${formatDate(entryDate)})`,
-    `🍔 ${en.best_evm3_label} ${en.arrow} (${bestEvm3En}) ✨`,
+    `🍔 ${en.best_evm3_label}    ${en.arrow} (${bestEvm3En}) ✨`,
     `🧀 ${en.best_cheese_label} ${en.arrow} (${bestCheeseEn}) ✨`,
     en.closing,
     ``,
