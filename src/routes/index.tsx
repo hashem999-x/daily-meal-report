@@ -91,7 +91,11 @@ function Login({ onLogin }: { onLogin: (s: Session) => void }) {
       const s = await call({ data: { code } });
       onLogin(s);
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Login failed");
+      const msg = e instanceof Error ? e.message : "Login failed";
+      if (/<html|FORCE_RELOAD/i.test(msg)) {
+        setErr("App was updated — reloading, please try again.");
+        setTimeout(() => window.location.reload(), 800);
+      } else setErr(msg);
     } finally {
       setBusy(false);
     }
